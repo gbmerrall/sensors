@@ -1,0 +1,23 @@
+services:
+  backend:
+    container_name: sensors_backend
+    image: gmerrall/sensors
+    ports:
+      - 5000:5000
+    volumes:
+      - sensorsVolume:/sensors/external
+    restart: unless-stopped
+
+  dashboard:
+    container_name: sensors_dashboard
+    image: gmerrall/sensors_dashboard
+    ports:
+      - 5050:5050
+    volumes:
+      - sensorsVolume:/dashboard/external
+    restart: unless-stopped
+
+volumes:
+  sensorsVolume:
+    external: true
+    name: sensorsVolume

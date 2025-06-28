@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+adafruit-ampy = "*"
+dash = "*"
+dash-bootstrap-components = "*"
+fastapi = "*"
+uvicorn = "*"
+json-checker = "*"
+jsonschema = "*"
+pandas = "*"
+python-dotenv = "*"
+pytz = "*"
+requests = "*"
+rshell = "*"
+sqlalchemy = "*"
+werkzeug = "*"
+sqlmodel = "*"
+gunicorn = "*"
+
+[dev-packages]
+pytest = "*"
+ruff = "*"
+esptool = "*"
+
+[requires]
+python_version = "3.12"

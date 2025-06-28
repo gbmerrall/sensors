@@ -1,0 +1,21 @@
+{
+    "sensors": {
+        "temperature": [
+            {
+                "mac": "dd:cc:bb:aa:99:88",
+                "location": "lounge"
+            },
+            {
+                "mac": "aa:11:22:33:44:55",
+                "location": "garage"
+
+            }
+        ],
+        "air_quality": [
+            {
+                "mac": "22:ee:ff:aa:bb:cc",
+                "location": "master bedroom"
+            }
+        ]
+    }
+}

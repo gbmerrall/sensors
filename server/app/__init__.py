@@ -1,0 +1,1 @@
+# FastAPI Sensors Server Application 

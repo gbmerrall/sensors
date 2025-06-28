@@ -1,0 +1,9 @@
+Pipefile.lock
+server/test.py
+server/.flaskenv
+server/external/sensors.db
+**/pymakr.conf
+**/__pycache__/
+**/.pytest_cache/
+.DS_Store
+Pipfile.lock
