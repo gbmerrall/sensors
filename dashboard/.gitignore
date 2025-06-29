@@ -1,6 +1,7 @@
 # my own stuff
 .DS_Store
 Pipfile.lock
+external/sensors.db
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

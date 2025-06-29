@@ -85,15 +85,24 @@ class DashboardCallbacks:
                 locations = self.db_manager.get_available_locations()
                 location_options = [{'label': loc, 'value': loc} for loc in locations]
                 
-                # Set default date range (last 7 days)
-                end_date = datetime.now()
-                start_date = end_date - timedelta(days=7)
-                
-                # Load initial data with timezone-aware conversion
+                # Set default date range to current day in Pacific/Auckland timezone
                 if self.timezone_processor:
-                    # Convert to UTC for database query
-                    start_local = self.timezone_processor.local_tz.localize(start_date.replace(hour=0, minute=0, second=0))
-                    end_local = self.timezone_processor.local_tz.localize(end_date.replace(hour=23, minute=59, second=59))
+                    # Get current date in Pacific/Auckland timezone
+                    utc_now = datetime.now(self.timezone_processor.utc_tz)
+                    local_now = utc_now.astimezone(self.timezone_processor.local_tz)
+                    current_date = local_now.date()
+                    
+                    # Set both start and end to current day
+                    start_date = current_date
+                    end_date = current_date
+                    
+                    # Convert to UTC for database query (database timestamps are in UTC)
+                    start_local = self.timezone_processor.local_tz.localize(
+                        datetime.combine(current_date, datetime.min.time())  # 00:00:00
+                    )
+                    end_local = self.timezone_processor.local_tz.localize(
+                        datetime.combine(current_date, datetime.max.time().replace(microsecond=0))  # 23:59:59
+                    )
                     
                     start_utc = start_local.astimezone(self.timezone_processor.utc_tz)
                     end_utc = end_local.astimezone(self.timezone_processor.utc_tz)
@@ -103,27 +112,36 @@ class DashboardCallbacks:
                         end_utc.strftime('%Y-%m-%d %H:%M:%S'),
                         locations
                     )
+                    
+                    logger.info(f"Dashboard initialized with current day: {current_date} (Pacific/Auckland)")
+                    logger.debug(f"Database query range: {start_utc.strftime('%Y-%m-%d %H:%M:%S')} to {end_utc.strftime('%Y-%m-%d %H:%M:%S')} (UTC)")
                 else:
-                    # Fallback to original method
+                    # Fallback to system current date if no timezone processor
+                    current_date = datetime.now().date()
+                    start_date = current_date
+                    end_date = current_date
+                    
                     initial_data = self._load_sensor_data(
-                        start_date.strftime('%Y-%m-%d 00:00:00'),
-                        end_date.strftime('%Y-%m-%d 23:59:59'),
+                        f"{current_date.strftime('%Y-%m-%d')} 00:00:00",
+                        f"{current_date.strftime('%Y-%m-%d')} 23:59:59",
                         locations
                     )
-                
-                logger.info(f"Dashboard initialized with {len(locations)} locations")
+                    
+                    logger.warning("Timezone processor not available, using system date")
                 
                 return (
                     location_options,
                     locations,  # Select all locations by default
-                    start_date.date(),
-                    end_date.date(),
+                    start_date,
+                    end_date,
                     initial_data
                 )
                 
             except Exception as e:
                 logger.error(f"Dashboard initialization failed: {e}")
-                return [], [], None, None, {}
+                # Fallback to system current date
+                current_date = datetime.now().date()
+                return [], [], current_date, current_date, {}
     
     def _register_chart_callbacks(self):
         """Register callbacks for chart updates"""
@@ -296,7 +314,7 @@ class DashboardCallbacks:
                     return {}
                 
                 # Convert dates to datetime with proper time boundaries in local timezone
-                # Then convert to UTC for database query
+                # Then convert to UTC for database query (database timestamps are in UTC)
                 if self.timezone_processor:
                     # Create local timezone datetime objects
                     start_local = self.timezone_processor.local_tz.localize(

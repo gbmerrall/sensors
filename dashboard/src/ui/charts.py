@@ -126,6 +126,7 @@ class ChartComponents:
                 title=dict(text=title, x=0.5, font=dict(size=16, weight='bold')),
                 xaxis_title="Time",
                 yaxis_title="Temperature (°C)",
+                yaxis=dict(range=[10, 30]),  # Fixed Y-axis range for temperature
                 height=self.chart_config['default_height'],
                 **self.chart_style
             )
@@ -219,6 +220,7 @@ class ChartComponents:
                 title=dict(text=title, x=0.5, font=dict(size=16, weight='bold')),
                 xaxis_title="Time",
                 yaxis_title="Humidity (%)",
+                yaxis=dict(range=[30, 100]),  # Fixed Y-axis range for humidity
                 height=self.chart_config['default_height'],
                 **self.chart_style
             )

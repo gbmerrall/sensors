@@ -9,7 +9,9 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from typing import Dict, Any
 from src.utils.logging_setup import get_ui_logger
-from datetime import date  # Added for default date
+from datetime import date, datetime
+import pytz
+from src.utils.config import Config
 
 logger = get_ui_logger()
 
@@ -27,7 +29,24 @@ class DashboardLayout:
         self.app_title = "🌡️ Sensors Dashboard"
         self.brand_color = "#2c3e50"
         self.accent_color = "#3498db"
+        
+        # Get current date in Pacific/Auckland timezone
+        self.local_tz = pytz.timezone(Config.DEFAULT_TIMEZONE)
+        self.current_date = date.today()  # Will be replaced with timezone-aware date
+        self._set_current_date()
+        
         logger.info("Dashboard layout manager initialized")
+    
+    def _set_current_date(self):
+        """Set current date in Pacific/Auckland timezone"""
+        try:
+            utc_now = datetime.now(pytz.UTC)
+            local_now = utc_now.astimezone(self.local_tz)
+            self.current_date = local_now.date()
+            logger.debug(f"Current date set to: {self.current_date} (Pacific/Auckland)")
+        except Exception as e:
+            logger.warning(f"Failed to set timezone-aware date, using system date: {e}")
+            self.current_date = date.today()
     
     def create_header(self) -> dbc.Row:
         """
@@ -88,8 +107,8 @@ class DashboardLayout:
                                 clearable=True,
                                 with_portal=False,
                                 updatemode='singledate',  # Allow independent date selection
-                                start_date=date.today().isoformat(),  # Default to today
-                                end_date=date.today().isoformat()     # Default to today
+                                start_date=self.current_date.isoformat(),  # Use Pacific/Auckland current date
+                                end_date=self.current_date.isoformat()     # Use Pacific/Auckland current date
                             )
                         ], xs=12, sm=6, lg=3),
                         

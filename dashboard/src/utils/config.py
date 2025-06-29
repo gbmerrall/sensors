@@ -69,7 +69,7 @@ class Config:
     # Application Settings
     DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
     HOST = os.getenv('HOST', '0.0.0.0')
-    PORT = int(os.getenv('PORT', 8050))
+    PORT = int(os.getenv('PORT', 5050))
     
     @classmethod
     def get_database_path(cls) -> str:

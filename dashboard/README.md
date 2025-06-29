@@ -5,8 +5,10 @@ A comprehensive IoT monitoring platform that provides real-time visualization of
 ## 🚀 Features
 
 - **Real-time Data Visualization**: Interactive charts for temperature, humidity, and battery data
+- **Current Day Focus**: Dashboard defaults to current day data with timezone-aware Pacific/Auckland date handling
 - **Multi-location Support**: Monitor sensors across different locations
 - **Smart Data Aggregation**: Intelligent aggregation strategies based on time range and data density
+- **Professional Chart Scaling**: Fixed Y-axis ranges for consistent visualization (Temperature: 10-30°C, Humidity: 30-100%)
 - **Timezone Processing**: Robust Pacific/Auckland timezone conversion with DST handling
 - **Responsive Design**: Mobile-first dashboard interface with Bootstrap theme
 - **Comprehensive Statistics**: Advanced statistical analysis and comfort indices
@@ -79,10 +81,15 @@ Ensure your database contains sensor data in the expected format. The system wil
    Open your browser and navigate to `http://localhost:8050`
 
 3. **Using the dashboard**
-   - Select date range using the date picker
-   - Choose location from the dropdown
-   - Select aggregation strategy (raw, hourly, daily, weekly)
-   - View real-time charts and statistics
+   - **Default View**: Dashboard automatically loads current day data in Pacific/Auckland timezone
+   - **Date Selection**: Use date picker to select different date ranges (supports single day to multi-day selection)
+   - **Location Filtering**: Choose specific locations from the dropdown (defaults to all available locations)
+   - **Data Aggregation**: Select aggregation strategy (raw, hourly, daily, weekly, or auto-select)
+   - **Chart Analysis**: View interactive charts with fixed Y-axis ranges for consistent comparison
+     - Temperature: 10°C to 30°C range
+     - Humidity: 30% to 100% range
+     - Battery: Auto-scaling based on voltage/percentage data
+   - **Statistics**: Real-time statistics cards showing current averages, min/max values, and data point counts
 
 ## 🏗️ Architecture Overview
 
@@ -119,9 +126,9 @@ sensors_dashboard/
 - **DatabaseManager**: SQLAlchemy-based database access with connection pooling
 
 #### Dashboard Interface
-- **DashboardLayout**: Responsive layout with Bootstrap theme
-- **ChartComponents**: Interactive Plotly charts for each data type
-- **DashboardCallbacks**: Real-time data updates and user interaction handling
+- **DashboardLayout**: Responsive layout with Bootstrap theme and timezone-aware current day defaults
+- **ChartComponents**: Interactive Plotly charts with professional fixed Y-axis scaling
+- **DashboardCallbacks**: Real-time data updates, timezone conversion, and user interaction handling
 
 #### Configuration System
 - **Config**: Centralized configuration management
@@ -155,7 +162,7 @@ To modify the system for your needs:
 
 1. **Database Schema**: Update table structures in `src/data/database_manager.py`
 2. **Timezone**: Change timezone in `src/utils/config.py`
-3. **Charts**: Modify chart components in `src/ui/charts.py`
+3. **Charts**: Modify chart components in `src/ui/charts.py` (includes fixed Y-axis ranges for consistency)
 4. **Layout**: Customize dashboard layout in `src/ui/layout.py`
 5. **Aggregation**: Add new aggregation strategies in `src/data/aggregation_engine.py`
 
@@ -172,9 +179,11 @@ The system automatically selects the best aggregation strategy based on time ran
 
 ### Timezone Processing
 All timestamps are stored in UTC and converted to Pacific/Auckland timezone for display. The system handles:
-- Daylight Saving Time transitions
-- Timezone validation
-- Graceful error handling for invalid timestamps
+- **Current Day Detection**: Dashboard defaults to current day in Pacific/Auckland timezone
+- **Automatic UTC Conversion**: Local date selections converted to UTC for database queries
+- **Daylight Saving Time transitions**: Robust DST handling with pytz library
+- **Timezone validation**: Comprehensive timezone boundary and edge case handling
+- **Graceful error handling**: Fallback mechanisms for invalid timestamps
 
 ### Statistics Calculation
 The system provides comprehensive statistics:
@@ -304,6 +313,12 @@ For issues and questions:
 3. Open an issue on GitHub
 
 ## 🔄 Version History
+
+- **v1.1.0**: Enhanced user experience (2025-06-29)
+  - **Current Day Default**: Date picker defaults to current day in Pacific/Auckland timezone
+  - **Professional Chart Scaling**: Fixed Y-axis ranges (Temperature: 10-30°C, Humidity: 30-100%)
+  - **Improved Usability**: Automatic current data loading without manual selection
+  - **Enhanced Documentation**: Comprehensive documentation updates
 
 - **v1.0.0**: Initial release with core functionality
   - Real-time data visualization
