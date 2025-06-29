@@ -9,6 +9,7 @@ from dash import html, dcc
 import dash_bootstrap_components as dbc
 from typing import Dict, Any
 from src.utils.logging_setup import get_ui_logger
+from datetime import date  # Added for default date
 
 logger = get_ui_logger()
 
@@ -86,7 +87,9 @@ class DashboardLayout:
                                 minimum_nights=0,  # Allow same day selection
                                 clearable=True,
                                 with_portal=False,
-                                updatemode='singledate'  # Allow independent date selection
+                                updatemode='singledate',  # Allow independent date selection
+                                start_date=date.today().isoformat(),  # Default to today
+                                end_date=date.today().isoformat()     # Default to today
                             )
                         ], xs=12, sm=6, lg=3),
                         
