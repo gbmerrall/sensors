@@ -303,7 +303,7 @@ The system implements multi-level caching:
 
 ## 📝 License
 
-[Add your license information here]
+MIT
 
 ## 🆘 Support
 
