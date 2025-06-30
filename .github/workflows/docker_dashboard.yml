@@ -3,6 +3,10 @@ name: Build and Push Docker image
 on:
   push:
     branches: [ main ]  # or any branch you want
+    paths:
+      - 'dashboard/src/**'
+      - 'dashboard/Dockerfile'
+      - 'dashboard/requirements.txt'    
 
 jobs:
   build:
