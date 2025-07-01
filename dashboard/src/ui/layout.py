@@ -344,12 +344,7 @@ class DashboardLayout:
                 dbc.Col([
                     html.Hr(),
                     html.Div([
-                        html.P([
-                            "Sensors Dashboard System | ",
-                            html.A("Documentation", href="#", className="text-decoration-none"),
-                            " | ",
-                            html.A("Support", href="#", className="text-decoration-none")
-                        ], className="text-center text-muted mb-0")
+                        html.P("Powered by Dash", className="text-muted mb-0")
                     ])
                 ], width=12)
             ], className="mt-4")
