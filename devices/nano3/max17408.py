@@ -25,8 +25,9 @@ class MAX1704:
 
     def get_percentage(self):
         # Read percentage
-        percentage = self.read_register(MAX17048_SOC) / 256
-        return percentage
+        percentage = self.read_register(MAX17048_SOC) / 256.0
+        # The sensor can occasionally report > 100%, so we cap it.
+        return min(percentage, 100.0)
 
 
     def get_dischargerate(self):

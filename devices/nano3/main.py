@@ -49,7 +49,7 @@ def send_data(url: str, data: dict) -> bool:
         )
         log(f"Response from {url}: {response.status_code}")
         if response.status_code != 200:
-            log(f"Error payload: {data}")
+            log(f"Error sending to {url}. Error: {response.text}")
         else:
             log("Data sent successfully.")
         # In MicroPython, it's good practice to close responses to free up memory.
