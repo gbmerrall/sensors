@@ -9,6 +9,7 @@ import network
 import ahtx0
 import max17408
 import config
+import sgp41
 
 # These variables are initialized in boot.py and are globally available:
 # i2c, rtc, wlan_mac
@@ -18,6 +19,12 @@ OFFLINE_LOG_FILE = "offline_data.json"
 TEMP_URL = f"http://{config.SERVER_IP}:{config.SERVER_PORT}/temperature"
 POWER_URL = f"http://{config.SERVER_IP}:{config.SERVER_PORT}/powerstatus"
 CONNECTION_URL = f"http://{config.SERVER_IP}:{config.SERVER_PORT}/connection"
+
+# Add new URL for SGP41 data
+VOC_URL = f"http://{config.SERVER_IP}:{config.SERVER_PORT}/voc"
+
+# Update the VOC URL to use the new endpoint
+SGP41_VOC_URL = f"http://{config.SERVER_IP}:{config.SERVER_PORT}/sgp41-voc"
 
 # This block is never executed but provides type hints for the linter
 # to understand the global variables initialized in boot.py.
@@ -156,6 +163,52 @@ def get_formatted_timestamp() -> str:
     # format the timestamp. everything needs to be 0 padded
     return f"{year}-{month:02}-{mday:02}T{hour:02}:{minute:02}:{second:02}+00:00"
 
+def get_voc_data(sgp41_sensor, aht20_sensor, timestamp) -> dict:
+    """Gets VOC and NOx data from SGP41 sensor with temperature/humidity compensation."""
+    if sgp41_sensor is None:
+        return None
+        
+    # Get temperature and humidity from AHT20 for compensation
+    temperature = aht20_sensor.temperature
+    humidity = aht20_sensor.relative_humidity
+    
+    # Measure with compensation
+    sraw_voc, sraw_nox = sgp41_sensor.measure_raw(temperature, humidity)
+    if sraw_voc is None or sraw_nox is None:
+        return None
+        
+    return {
+        'mac': wlan_mac,
+        'voc_raw': sraw_voc,
+        'nox_raw': sraw_nox,
+        'temperature': round(temperature, 2),  # Include T/H for reference
+        'humidity': round(humidity, 2),
+        'timestamp': timestamp
+    }
+
+def get_sgp41_voc_data(sgp41_sensor, aht20_sensor, timestamp) -> dict:
+    """Gets SGP41 VOC and NOx data with temperature/humidity compensation."""
+    if sgp41_sensor is None:
+        return None
+        
+    # Get temperature and humidity from AHT20 for compensation
+    temperature = aht20_sensor.temperature
+    humidity = aht20_sensor.relative_humidity
+    
+    # Measure with compensation
+    sraw_voc, sraw_nox = sgp41_sensor.measure_raw(temperature, humidity)
+    if sraw_voc is None or sraw_nox is None:
+        return None
+        
+    return {
+        'mac': wlan_mac,
+        'voc_raw': sraw_voc,
+        'nox_raw': sraw_nox,
+        'temperature': round(temperature, 2),  # Include T/H for reference
+        'humidity': round(humidity, 2),
+        'timestamp': timestamp
+    }
+
 
 # --- Execution starts here ---
 
@@ -184,16 +237,41 @@ temp_data = get_temp_data(aht20, now)
 max17 = max17408.MAX1704(i2c)
 battery_data = get_battery_data(max17, now)
 
+# Initialize SGP41 sensor (with detection)
+sgp41_sensor = None
+if config.SGP41_ENABLED:
+    try:
+        sgp41_sensor = sgp41.SGP41(i2c)
+        if sgp41_sensor.initialize():
+            log("SGP41 sensor initialized successfully")
+            # Run conditioning if needed (only once after power-up)
+            # You might want to store this state in RTC memory
+        else:
+            log("SGP41 sensor not detected or failed to initialize")
+            sgp41_sensor = None
+    except Exception as e:
+        log(f"SGP41 sensor error: {e}")
+        sgp41_sensor = None
+
+# Collect VOC data if sensor is available
+voc_data = None
+if sgp41_sensor is not None:
+    voc_data = get_voc_data(sgp41_sensor, aht20, now)
+
 # Send or save the current data based on network status
 if server_is_available:
     log("Sending current sensor readings...")
     # Send sequentially. If one fails, we still try the next.
     send_data(TEMP_URL, temp_data)
     send_data(POWER_URL, battery_data)
+    if voc_data is not None:
+        send_data(SGP41_VOC_URL, voc_data)  # Updated URL
 else:
     log("Saving current sensor readings to offline log.")
     save_data_offline(TEMP_URL, temp_data)
     save_data_offline(POWER_URL, battery_data)
+    if voc_data is not None:
+        save_data_offline(SGP41_VOC_URL, voc_data)  # Updated URL
 
 # we also need a sleep period to allow us to interrupt at power on
 log(f"Entering deep sleep for {config.SLEEP_TIME_MINUTES} minutes...")

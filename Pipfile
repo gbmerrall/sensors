@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-adafruit-ampy = "*"
 dash = "*"
 dash-bootstrap-components = "*"
 fastapi = "*"
@@ -20,6 +19,8 @@ sqlalchemy = "*"
 werkzeug = "*"
 sqlmodel = "*"
 gunicorn = "*"
+adafruit-ampy = "*"
+sensirion-i2c-sgp4x = {editable = true, git = "https://github.com/Sensirion/python-i2c-sgp4x.git"}
 
 [dev-packages]
 pytest = "*"

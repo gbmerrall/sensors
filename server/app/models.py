@@ -32,4 +32,20 @@ class NanoCellBattery(SQLModel, table=True):
         default_factory=datetime.utcnow,
         primary_key=True,
         sa_column_kwargs={"server_default": "CURRENT_TIMESTAMP"}
+    )
+
+class SGP41VOCData(SQLModel, table=True):
+    """SGP41 VOC and NOx sensor data model."""
+    __tablename__ = "sgp41_voc_data"
+    
+    location: str = Field(max_length=64, primary_key=True)
+    mac: str = Field(max_length=64)
+    voc_raw: int = Field(description="Raw VOC value from SGP41")
+    nox_raw: int = Field(description="Raw NOx value from SGP41")
+    temperature: Decimal = Field(max_digits=10, decimal_places=2, description="Temperature used for compensation")
+    humidity: Decimal = Field(max_digits=10, decimal_places=2, description="Humidity used for compensation")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow,
+        primary_key=True,
+        sa_column_kwargs={"server_default": "CURRENT_TIMESTAMP"}
     ) 

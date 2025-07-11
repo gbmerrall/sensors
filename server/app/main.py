@@ -7,8 +7,8 @@ from sqlmodel import Session
 import logging
 
 from .database import get_session, create_db_and_tables
-from .schemas import TemperatureRequest, PowerStatusRequest, ResponseMessage
-from .services import process_temperature_data, process_power_status_data
+from .schemas import TemperatureRequest, PowerStatusRequest, SGP41VOCRequest, ResponseMessage
+from .services import process_temperature_data, process_power_status_data, process_sgp41_voc_data
 from .utils import reload_sensor_config
 
 # Configure logging
@@ -137,6 +137,41 @@ async def log_power_status(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to process power status data: {str(e)}"
+        )
+
+@app.post("/sgp41-voc", status_code=status.HTTP_200_OK)
+async def log_sgp41_voc(
+    data: SGP41VOCRequest,
+    session: Session = Depends(get_session)
+):
+    """
+    Log SGP41 VOC and NOx data from sensors.
+    
+    Accepts JSON with:
+    - mac: MAC address of the sensor
+    - voc_raw: Raw VOC value from SGP41
+    - nox_raw: Raw NOx value from SGP41
+    - temperature: Temperature used for compensation
+    - humidity: Humidity used for compensation
+    - timestamp: ISO 8601 timestamp (optional)
+    """
+    try:
+        logger.info(f"Processing SGP41 VOC data from {data.mac}")
+        
+        # Process and store the data
+        process_sgp41_voc_data(session, data)
+        
+        logger.info(f"Successfully stored SGP41 VOC data for {data.mac}")
+        return JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content={"message": "SGP41 VOC data stored successfully"}
+        )
+        
+    except Exception as e:
+        logger.error(f"Error processing SGP41 VOC data: {e=}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to process SGP41 VOC data: {str(e)}"
         )
 
 @app.exception_handler(HTTPException)
