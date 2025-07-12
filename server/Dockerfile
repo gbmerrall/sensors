@@ -11,6 +11,9 @@
 
 FROM python:3.12-slim-bookworm
 
+# we need git to install any git based dependencies in requirements.txt
+RUN apt-get update && apt-get install -y git
+
 WORKDIR /sensors
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache -r requirements.txt
