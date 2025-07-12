@@ -3,6 +3,8 @@ server/test.py
 server/.flaskenv
 server/external/sensors.db
 **/pymakr.conf
+**/config.py
+!**/config.py.example
 **/__pycache__/
 **/.pytest_cache/
 .DS_Store
